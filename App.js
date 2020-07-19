@@ -23,7 +23,15 @@ export default class EztVedd extends PureComponent {
 
     addNew() {
         let items = me.state.itemList;
-        items.push({id: items.length + 1 + ''});
+        items.push({
+            id: items.length + 1 + '',
+            name: 'sajt',
+            shop: 'Penny',
+            minPrice: 0,
+            maxPrice: 0,
+            barCode: '',
+            stuffStatus: 'new'
+        });
         me.setStuff(items);
     }
     
@@ -35,7 +43,14 @@ export default class EztVedd extends PureComponent {
                     data={this.state.itemList}
                     renderItem={({item}) => {
                         return ( 
-                            <Stuff id={item.id} />
+                            <Stuff id={item.id}
+                               name={item.name}
+                               shop={item.shop}
+                               minPrice={item.minPrice} 
+                               maxPrice={item.maxPrice}
+                               barCode={item.barCode}
+                               stuffStatus={item.stuffStatus}
+                            />
                         )
                     }}
                     extraData={this.state.refreshList}

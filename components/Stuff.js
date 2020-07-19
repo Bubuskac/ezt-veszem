@@ -1,5 +1,5 @@
 import React, { PureComponent } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 
 class Stuff extends PureComponent {
     id = -1
@@ -14,20 +14,33 @@ class Stuff extends PureComponent {
     constructor(props) {
         super(props);
         this.id = props.id;
-        this.setState({
+        this.state = {
             name: props.name,
             shop: props.shop,
             minPrice: props.minPrice,
             maxPrice: props.maxPrice,
             barCode: props.barCode,
             stuffState: props.stuffState,
-        });
+        };
     }
 
     render() {
+        const {name, shop, minPrice, maxPrice, barCode, stuffState} = this.state;
         return (
             <View style={styles.stuff}>
-                <Text style={{color: '#FFFFFF'}}>{this.id + ''}. Sajt</Text>
+                <View style={[styles.shop, styles.stuffContainer]}>
+                    <Text style={styles.text}>{shop}</Text>
+                </View>
+                <View style={[styles.name, styles.stuffContainer]}>
+                    <Text style={[styles.nameText, styles.text]}>{name}</Text>
+                </View>
+                <View style={[styles.price, styles.stuffContainer]}>
+                    <Text style={styles.text}>{minPrice}</Text>
+                    <Text style={styles.text}>{maxPrice}</Text>
+                </View>
+                <TouchableOpacity style={styles.button}>
+                    <Text style={styles.closeSign}>X</Text>
+                </TouchableOpacity>
             </View>
         );
     }
@@ -48,5 +61,35 @@ const styles = StyleSheet.create({
         borderStyle: 'solid',
         borderWidth: 1,
         margin: 3,
+        flex: 1,
+        flexDirection: 'row',
+        alignContent: 'space-around'
     },
+    button: {
+        marginRight: 5,
+    },
+    closeSign: {
+        color: '#FFFFFF',
+        fontSize: '1.5rem',
+    },
+    text: {
+        color: '#FFFFFF',
+    },
+    stuffContainer: {
+        justifyContent: 'center',
+        flex: 1,
+    },
+    shop: {
+        alignSelf: 'flex-start',
+    },
+    name: {
+        alignItems: 'center',
+    },
+    nameText: {
+        fontSize: '1.8rem',
+    },
+    price: {
+        alignItems: 'flex-end',
+        marginRight: 20,
+    }
 });

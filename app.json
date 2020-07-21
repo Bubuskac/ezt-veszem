@@ -1,8 +1,8 @@
 {
   "expo": {
-    "name": "eztveszem",
+    "name": "Ezt Veszem",
     "slug": "eztveszem",
-    "version": "1.0.0",
+    "version": "0.1.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "splash": {
@@ -17,10 +17,17 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "hu.lustigames.eztveszem",
+      "buildNumber": "0.1.0"
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "android": {
+      "package": "hu.lustigames.eztveszem",
+      "versionCode": 1,
+      "permissions": []
     }
   }
 }

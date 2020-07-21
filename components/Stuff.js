@@ -84,7 +84,6 @@ const styles = StyleSheet.create({
     stuff: {
         backgroundColor: '#4CAF50',
         height: 50,
-        width: '99.5%',
         padding: 5,
         alignItems: 'center',
         justifyContent: 'center',
@@ -100,10 +99,6 @@ const styles = StyleSheet.create({
     button: {
         marginRight: 5,
     },
-    closeSign: {
-        color: '#FFFFFF',
-        fontSize: '1.5rem',
-    },
     text: {
         color: '#FFFFFF',
     },
@@ -118,7 +113,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     nameText: {
-        fontSize: '1.8rem',
+        fontSize: 28,
     },
     price: {
         alignItems: 'flex-end',
@@ -128,6 +123,6 @@ const styles = StyleSheet.create({
         backgroundColor: '#388E3C',
     },
     icon: {
-        margin: '10px',
+        margin: 10,
     }
 });

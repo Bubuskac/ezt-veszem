@@ -14,7 +14,7 @@ class MainTools extends PureComponent {
         return (
             <View style={styles.buttonContainer}>
                 <TouchableOpacity onPress={() => this.interface("new")} style={styles.button}>
-                    <Text style={styles.plusSign}>+</Text>
+                    <Icon name={'plus'} color={'#FFFFFF'} type={'font-awesome-5'}/>
                 </TouchableOpacity>
                 <TouchableOpacity onPress={() => this.interface("save")} style={styles.button}>
                     <Icon name={'save'} color={'#FFFFFF'} type={'font-awesome-5'}/>
@@ -47,11 +47,6 @@ const styles = StyleSheet.create({
         backgroundColor: '#536DFE',
         alignItems: 'center',
         justifyContent: 'center',
-        margin: '10px',
-    },
-    plusSign: {
-        color: '#FFFFFF',
-        fontSize: '2rem',
-        marginTop: '-0.5rem',
+        margin: 10,
     }
 });

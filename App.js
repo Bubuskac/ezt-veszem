@@ -1,6 +1,6 @@
 import { StatusBar } from 'expo-status-bar';
 import React, { PureComponent } from 'react';
-import { StyleSheet, View, TouchableHighlight, Text, FlatList } from 'react-native';
+import { StyleSheet, View, Dimensions, FlatList } from 'react-native';
 import { Stuff } from './components/Stuff';
 import { MainTools } from './components/MainTools';
 import AsyncStorage from '@react-native-community/async-storage';
@@ -140,6 +140,6 @@ const styles = StyleSheet.create({
         margin: 10,
     },
     list: {
-        height: '90vh',
+        height: Dimensions.get('window').height - 20,
     },
 });

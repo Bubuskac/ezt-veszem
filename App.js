@@ -1,42 +1,107 @@
 import { StatusBar } from 'expo-status-bar';
 import React, { PureComponent } from 'react';
 import { StyleSheet, View, TouchableHighlight, Text, FlatList } from 'react-native';
-import { Stuff } from './components/Stuff'
+import { Stuff } from './components/Stuff';
+import { MainTools } from './components/MainTools';
+import AsyncStorage from '@react-native-community/async-storage';
 
 let me = null;
 
 export default class EztVedd extends PureComponent {
+    maxId = 1;
+
     constructor() {
         super();
         this.state = {
             itemList: [],
             refreshList: true
         }
+        me = this;
+        this.loadStuff();
+    }
+
+    async loadStuff() {
+        try {
+            const value = await AsyncStorage.getItem('stuffToBuy')
+            if (value !== null) {
+                const itemList = JSON.parse(value);
+                this.setStuff(itemList);
+                itemList.forEach(item => {
+                    if (item.id >= this.maxId) {
+                        this.maxId = item.id + 1;
+                    }
+                });
+            }
+        } catch(e) {
+            console.log(e);
+        }
+    }
+
+    async saveStuff() {
+        try {
+            await AsyncStorage.setItem('stuffToBuy', JSON.stringify(this.state.itemList));
+          } catch (e) {
+            console.log(e);
+          }
     }
 
     setStuff(items) {
-        me.setState({
+        this.setState({
             itemList: items,
-            refreshList: !me.state.refreshList
+            refreshList: !this.state.refreshList
         });
     }
 
     addNew() {
-        let items = me.state.itemList;
+        let items = this.state.itemList;
         items.push({
-            id: items.length + 1 + '',
-            name: 'sajt',
-            shop: 'Penny',
-            minPrice: 0,
-            maxPrice: 0,
+            id: this.maxId + '',
+            name: '',
+            shop: '',
+            minPrice: '0',
+            maxPrice: '0',
             barCode: '',
-            stuffStatus: 'new'
+            stuffStatus: 'new',
+            editing: true,
         });
-        me.setStuff(items);
+        this.maxId++;
+        this.setStuff(items);
+    }
+
+    removeStuff(id) {
+        let items = this.state.itemList;
+        this.setStuff(items.filter(stuff => stuff.id !== id));
+    }
+
+    updateStuff(id, stuff) {
+        let items = this.state.itemList;
+        const i = items.findIndex(item => item.id === id)
+        let item = items[i];
+        item.name = stuff.name;
+        item.shop = stuff.shop;
+        item.maxPrice = stuff.maxPrice;
+        item.minPrice = stuff.minPrice;
+        item.editing = stuff.editing;
+        items[i] = item;
+        this.setStuff(items);
+    }
+
+    reciever(type, id, stuff) {
+        if (type == "remove") {
+            me.removeStuff(id);
+        }
+        if (type == "update") {
+            me.updateStuff(id, stuff);
+        }
+        if (type == "new") {
+            me.addNew();
+        }
+        if (type == "save") {
+            me.saveStuff();
+        }
     }
     
     render() {
-        me = this;
         return (
             <View style={styles.container}>
                 <FlatList
@@ -50,6 +115,8 @@ export default class EztVedd extends PureComponent {
                                maxPrice={item.maxPrice}
                                barCode={item.barCode}
                                stuffStatus={item.stuffStatus}
+                               editing={item.editing}
+                               interface={this.reciever}
                             />
                         )
                     }}
@@ -57,11 +124,7 @@ export default class EztVedd extends PureComponent {
                     keyExtractor={stuff => stuff.id}
                     style={styles.list}
                 />
-                <View style={styles.buttonContainer}>
-                    <TouchableHighlight onPress={this.addNew} style={styles.button}>
-                        <Text style={styles.plusSign}>+</Text>
-                    </TouchableHighlight>
-                </View>
+                <MainTools interface={this.reciever} />
                 <StatusBar style="auto" />
             </View>
         );
@@ -79,27 +142,4 @@ const styles = StyleSheet.create({
     list: {
         height: '90vh',
     },
-    buttonContainer: {
-        alignItems: 'center',
-        position: 'absolute',
-        left: 0,
-        bottom: 0,
-        right: 0,
-    },
-    button: {
-        height: 50,
-        width: 50,
-        borderRadius: 50,
-        borderColor: '#445CC9',
-        borderStyle: 'solid',
-        borderWidth: 1,
-        backgroundColor: '#536DFE',
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    plusSign: {
-        color: 'white',
-        fontSize: '2rem',
-        marginTop: '-0.5rem',
-    }
 });

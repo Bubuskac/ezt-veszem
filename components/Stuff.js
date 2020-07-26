@@ -1,8 +1,13 @@
 import React, { PureComponent } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, TextInput } from 'react-native';
+import { StyleSheet, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';
 import { Icon } from 'react-native-elements'
+import { ClosedStuff } from './ClosedStuff'
+import { OpenedStuff } from './OpenedStuff'
+import { EditingStuff } from './EditingStuff';
 
 const iconColor = '#FFFFFF';
+
+let me = null;
 
 class Stuff extends PureComponent {
     id = -1
@@ -17,16 +22,17 @@ class Stuff extends PureComponent {
             shop: props.shop,
             minPrice: props.minPrice,
             maxPrice: props.maxPrice,
+            count: props.count,
+            unit: props.unit,
             barCode: props.barCode,
             stuffStatus: props.stuffStatus,
             editing: props.editing,
+            opened: false,
         };
+        me = this;
     }
 
-    edit(event) {
-        if (event.target.value) {
-            return;
-        }
+    edit() {
         this.state.editing = !this.state.editing;
         this.interface("update", this.id, this.state);
     }
@@ -40,33 +46,46 @@ class Stuff extends PureComponent {
         this.interface("remove", this.id);
     }
 
+    openClose() {
+        this.setState({opened: !this.state.opened});
+    }
+    
+    reciever(fieldName, value) {
+        me.state[fieldName] = value;
+        me.interface("update", me.id, me.state);
+    }
+
     render() {
-        const {name, shop, minPrice, maxPrice, barCode, stuffState, editing} = this.state;
+        const {name, shop, minPrice, maxPrice, count, unit, barCode, stuffStatus, editing, opened} = this.state;
         return (
-            <View style={styles.stuff} onPress={(event) => console.log(event)}>
-                <View style={[styles.shop, styles.stuffContainer]}>
-                    {editing == false && <Text style={styles.text}>{shop}</Text>}
-                    {editing == true && <TextInput style={[styles.text, styles.editor]}
-                        value={shop} 
-                        onChangeText={(shop) => this.editField('shop', shop)}/>}
-                </View>
-                <View style={[styles.name, styles.stuffContainer]}>
-                    {editing == false && <Text style={[styles.nameText, styles.text]}>{name}</Text>}
-                    {editing == true && <TextInput style={[styles.nameText, styles.text, styles.editor]}
-                        value={name}
-                        onChangeText={(name) => this.editField('name', name)}/>}
-                </View>
-                <View style={[styles.price, styles.stuffContainer]}>
-                    {editing == false && minPrice != 0 && <Text style={styles.text}>drágább mint {minPrice}</Text>}
-                    {editing == true && <TextInput style={[styles.text, styles.editor]}
-                        value={minPrice} 
-                        onChangeText={(minPrice) => this.editField('minPrice', minPrice)}/>}
-                    {editing == false && maxPrice != 0 && <Text style={styles.text}>olcsóbb mint {maxPrice}</Text>}
-                    {editing == true && <TextInput style={[styles.text, styles.editor]}
-                        value={maxPrice} 
-                        onChangeText={(maxPrice) => this.editField('maxPrice', maxPrice)}/>}
-                </View>
-                <TouchableOpacity onPress={(event) => this.edit(event)}>
+            <View style={styles.stuff}>
+                {editing == false && <TouchableOpacity style={styles.stuffData} onPress={() => this.openClose()}>
+                    {opened == false && <ClosedStuff
+                        name={name}
+                        count={count}
+                        unit={unit}
+                    />}
+                    {opened == true && <OpenedStuff
+                        name={name}
+                        shop={shop}
+                        minPrice={minPrice} 
+                        maxPrice={maxPrice}
+                        count={count}
+                        unit={unit}
+                        barCode={barCode}
+                    />}    
+                </TouchableOpacity>}
+                {editing == true && <EditingStuff
+                    name={name}
+                    shop={shop}
+                    minPrice={minPrice} 
+                    maxPrice={maxPrice}
+                    count={count}
+                    unit={unit}
+                    barCode={barCode}
+                    interface={this.reciever}
+                />}
+                <TouchableOpacity style={styles.button} onPress={() => this.edit()}>
                     {editing == false && <Icon name={'pen'} style={styles.icon} color={iconColor} type={'font-awesome-5'}/>}
                     {editing == true && <Icon name={'check'} style={styles.icon} color={iconColor} type={'font-awesome-5'}/>}
                 </TouchableOpacity>
@@ -83,7 +102,6 @@ export { Stuff }
 const styles = StyleSheet.create({
     stuff: {
         backgroundColor: '#4CAF50',
-        height: 50,
         padding: 5,
         alignItems: 'center',
         justifyContent: 'center',
@@ -94,35 +112,18 @@ const styles = StyleSheet.create({
         margin: 3,
         flex: 1,
         flexDirection: 'row',
-        alignContent: 'space-around'
+        alignContent: 'space-between'
     },
-    button: {
-        marginRight: 5,
-    },
-    text: {
-        color: '#FFFFFF',
-    },
-    stuffContainer: {
-        justifyContent: 'center',
+    stuffData: {
+        alignContent: 'stretch',
         flex: 1,
     },
-    shop: {
-        alignSelf: 'flex-start',
-    },
-    name: {
-        alignItems: 'center',
-    },
-    nameText: {
-        fontSize: 28,
-    },
-    price: {
-        alignItems: 'flex-end',
-        marginRight: 20,
-    },
-    editor: {
-        backgroundColor: '#388E3C',
+    button: {
+        justifyContent: 'center',
+        alignContent: 'center',
+        width: 34,
     },
     icon: {
-        margin: 10,
+        margin: 5,
     }
 });

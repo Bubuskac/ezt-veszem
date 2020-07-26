@@ -9,6 +9,7 @@ let me = null;
 
 export default class EztVedd extends PureComponent {
     maxId = 1;
+    stuffList = null;
 
     constructor() {
         super();
@@ -60,12 +61,15 @@ export default class EztVedd extends PureComponent {
             shop: '',
             minPrice: '0',
             maxPrice: '0',
+            count: '',
+            unit: '',
             barCode: '',
             stuffStatus: 'new',
             editing: true,
         });
         this.maxId++;
         this.setStuff(items);
+        this.stuffList.scrollToEnd();
     }
 
     removeStuff(id) {
@@ -81,6 +85,8 @@ export default class EztVedd extends PureComponent {
         item.shop = stuff.shop;
         item.maxPrice = stuff.maxPrice;
         item.minPrice = stuff.minPrice;
+        item.count = stuff.count;
+        item.unit = stuff.unit;
         item.editing = stuff.editing;
         items[i] = item;
         this.setStuff(items);
@@ -113,6 +119,8 @@ export default class EztVedd extends PureComponent {
                                shop={item.shop}
                                minPrice={item.minPrice} 
                                maxPrice={item.maxPrice}
+                               count={item.count}
+                               unit={item.unit}
                                barCode={item.barCode}
                                stuffStatus={item.stuffStatus}
                                editing={item.editing}
@@ -123,6 +131,7 @@ export default class EztVedd extends PureComponent {
                     extraData={this.state.refreshList}
                     keyExtractor={stuff => stuff.id}
                     style={styles.list}
+                    ref={(ref) => { this.stuffList = ref; }}
                 />
                 <MainTools interface={this.reciever} />
                 <StatusBar style="auto" />

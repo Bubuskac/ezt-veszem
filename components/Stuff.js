@@ -7,11 +7,11 @@ import { EditingStuff } from './EditingStuff';
 
 const iconColor = '#FFFFFF';
 
-let me = null;
+let us = {};
 
 class Stuff extends PureComponent {
-    id = -1
-    interface = null
+    id = -1;
+    interface = null;
 
     constructor(props) {
         super(props);
@@ -29,7 +29,8 @@ class Stuff extends PureComponent {
             editing: props.editing,
             opened: false,
         };
-        me = this;
+        us[this.id] = this;
+        this.interface("register", this.id, this);
     }
 
     edit() {
@@ -50,9 +51,14 @@ class Stuff extends PureComponent {
         this.setState({opened: !this.state.opened});
     }
     
-    reciever(fieldName, value) {
-        me.state[fieldName] = value;
-        me.interface("update", me.id, me.state);
+    reciever(id, fieldName, value) {
+        us[id].state[fieldName] = value;
+        us[id].interface("update", id, us[id].state);
+    }
+
+    refresh() {
+        this.setState({opened: !this.state.opened});
+        this.setState({opened: !this.state.opened});
     }
 
     render() {
@@ -76,6 +82,7 @@ class Stuff extends PureComponent {
                     />}    
                 </TouchableOpacity>}
                 {editing == true && <EditingStuff
+                    id={this.id}
                     name={name}
                     shop={shop}
                     minPrice={minPrice} 

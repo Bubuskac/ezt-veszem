@@ -4,70 +4,147 @@ import { StyleSheet, View, Dimensions, FlatList } from 'react-native';
 import { Stuff } from './components/Stuff';
 import { MainTools } from './components/MainTools';
 import AsyncStorage from '@react-native-community/async-storage';
+import config from './config.json';
 
 let me = null;
 
 export default class EztVedd extends PureComponent {
-    maxId = 1;
+    minId = -1;
     stuffList = null;
+    webOrAndroid = 'android';
+    email = null;
+    gToken = null;
+    firstLoad = true;
+    stuff = [];
+    removedStuff = [];
 
     constructor() {
         super();
         this.state = {
             itemList: [],
-            refreshList: true
+            refreshList: true,
+            editing: false,
         }
         me = this;
         this.loadStuff();
+        this.setUpGoogle();
     }
 
-    async loadStuff() {
+    async setUpGoogle() {
         try {
-            const value = await AsyncStorage.getItem('stuffToBuy')
-            if (value !== null) {
-                const itemList = JSON.parse(value);
-                this.setStuff(itemList);
-                itemList.forEach(item => {
-                    if (item.id >= this.maxId) {
-                        this.maxId = item.id + 1;
-                    }
+            await GoogleSignIn.initAsync();
+            const user = await GoogleSignIn.signInSilentlyAsync();
+            console.log(user);
+        } catch(e) {
+            this.webOrAndroid = 'web';
+        }
+    }
+
+    async loadStuff(remote) {
+        try {
+            if (!remote) {
+                const value = await AsyncStorage.getItem('stuffToBuy')
+                if (value !== null) {
+                    const itemList = JSON.parse(value);
+                    this.setStuff(itemList);
+                    itemList.forEach(item => {
+                        if (item.id <= this.minId) {
+                            this.minId = item.id - 1;
+                        }
+                    });
+                }
+            }
+            if (this.gToken) {
+                let response = await fetch(config.api, {
+                    method: 'POST',
+                    headers: {
+                        Accept: 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        token: this.gToken,
+                        method: "load"
+                    })
                 });
+                let json = await response.json();
+                if (json.message == "Stuff loaded") {
+                    json.stuff.forEach(stuff => {
+                        let item = this.stuff.find(item => item.id == stuff.id);
+                        if (item) {
+                            item.reciever(item.id, "shop", stuff.shop);
+                            item.reciever(item.id, "name", stuff.name);
+                            item.reciever(item.id, "minPrice", stuff.minPrice);
+                            item.reciever(item.id, "maxPrice", stuff.maxPrice);
+                            item.reciever(item.id, "count", stuff.count);
+                            item.reciever(item.id, "unit", stuff.unit);
+                            item.reciever(item.id, "stuffStatus", stuff.stuffStatus);
+                            item.reciever(item.id, "barCode", stuff.barCode);
+                            item.refresh();
+                        }
+                    });
+                    this.setStuff(json.stuff);
+                }
             }
         } catch(e) {
             console.log(e);
         }
     }
 
-    async saveStuff() {
+    async saveStuff(notAgain) {
         try {
             await AsyncStorage.setItem('stuffToBuy', JSON.stringify(this.state.itemList));
+            if (this.gToken) {
+                let response = await fetch(config.api, {
+                    method: 'POST',
+                    headers: {
+                        Accept: 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        token: this.gToken,
+                        stuff: this.state.itemList,
+                        removedStuff: this.removedStuff,
+                        method: "save"
+                    })
+                });
+                let json = await response.json();
+                if (json.message == "Stuff stored") {
+                    this.updateStuffIds(json.stuff);
+                    this.removedStuff = [];
+                } else if (!notAgain){
+                    this.saveStuff(true);
+                }
+            }
           } catch (e) {
             console.log(e);
           }
     }
 
     setStuff(items) {
+        const editing = items.findIndex(item => item.editing) > -1;
+
         this.setState({
             itemList: items,
-            refreshList: !this.state.refreshList
+            refreshList: !this.state.refreshList,
+            editing: editing
         });
     }
 
     addNew() {
         let items = this.state.itemList;
         items.push({
-            id: this.maxId + '',
+            id: this.minId + '',
             name: '',
             shop: '',
             minPrice: '0',
             maxPrice: '0',
             count: '',
-            unit: '',
+            unit: 'db',
             barCode: '',
             stuffStatus: 'new',
             editing: true,
         });
-        this.maxId++;
+        this.minId--;
         this.setStuff(items);
         this.stuffList.scrollToEnd();
     }
@@ -75,11 +152,14 @@ export default class EztVedd extends PureComponent {
     removeStuff(id) {
         let items = this.state.itemList;
         this.setStuff(items.filter(stuff => stuff.id !== id));
+        if (id > 0) {
+            this.removedStuff.push(id);
+        }
     }
 
     updateStuff(id, stuff) {
         let items = this.state.itemList;
-        const i = items.findIndex(item => item.id === id)
+        const i = items.findIndex(item => item.id === id);
         let item = items[i];
         item.name = stuff.name;
         item.shop = stuff.shop;
@@ -89,6 +169,17 @@ export default class EztVedd extends PureComponent {
         item.unit = stuff.unit;
         item.editing = stuff.editing;
         items[i] = item;
+        this.setStuff(items);
+    }
+
+    updateStuffIds(stuffIds) {
+        let items = this.state.itemList;
+        stuffIds.forEach((ids) => {
+            const i = items.findIndex(item => item.id === ids.o);
+            let item = items[i];
+            item.id = ids.n;
+            items[i] = item;
+        });
         this.setStuff(items);
     }
 
@@ -104,6 +195,21 @@ export default class EztVedd extends PureComponent {
         }
         if (type == "save") {
             me.saveStuff();
+        }
+        if (type == "email") {
+            me.email = id;
+        }
+        if (type == "token") {
+            me.gToken = id;
+            if (id != null && me.firstLoad) {
+                me.loadStuff(true);
+                me.firstLoad = false;
+            } else {
+                me.firstLoad = true;
+            }
+        }
+        if (type == "register") {
+            me.stuff.push(stuff);
         }
     }
     
@@ -129,11 +235,11 @@ export default class EztVedd extends PureComponent {
                         )
                     }}
                     extraData={this.state.refreshList}
-                    keyExtractor={stuff => stuff.id}
+                    keyExtractor={stuff => stuff.id + ""}
                     style={styles.list}
                     ref={(ref) => { this.stuffList = ref; }}
                 />
-                <MainTools interface={this.reciever} />
+                {!this.state.editing && <MainTools interface={this.reciever} webOrAndroid={this.webOrAndroid} />}
                 <StatusBar style="auto" />
             </View>
         );

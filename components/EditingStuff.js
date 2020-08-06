@@ -1,12 +1,13 @@
 import React, { PureComponent } from 'react';
-import { StyleSheet, Text, TextInput, View } from 'react-native';
-import {Picker} from '@react-native-community/picker';
+import { StyleSheet, Text, TextInput, View, Picker } from 'react-native';
 
 class EditingStuff extends PureComponent {
+    id = 0;
     interface = null;
 
     constructor(props) {
         super(props);
+        this.id = props.id;
         this.interface = props.interface;
         this.state = {
             name: props.name,
@@ -22,7 +23,7 @@ class EditingStuff extends PureComponent {
 
     editField(fieldName, value) {
         this.state[fieldName] = value;
-        this.interface(fieldName, value);
+        this.interface(this.id, fieldName, value);
     }
 
     render() {

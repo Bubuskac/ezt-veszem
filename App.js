@@ -1,9 +1,10 @@
 import { StatusBar } from 'expo-status-bar';
 import React, { PureComponent } from 'react';
-import { StyleSheet, View, Dimensions, FlatList } from 'react-native';
+import { StyleSheet, View, Dimensions, FlatList, Platform } from 'react-native';
 import { Stuff } from './components/Stuff';
 import { MainTools } from './components/MainTools';
 import AsyncStorage from '@react-native-community/async-storage';
+import * as GoogleSignIn from 'expo-google-sign-in';
 import config from './config.json';
 
 let me = null;
@@ -11,7 +12,6 @@ let me = null;
 export default class EztVedd extends PureComponent {
     minId = -1;
     stuffList = null;
-    webOrAndroid = 'android';
     email = null;
     gToken = null;
     firstLoad = true;
@@ -32,11 +32,14 @@ export default class EztVedd extends PureComponent {
 
     async setUpGoogle() {
         try {
-            await GoogleSignIn.initAsync();
-            const user = await GoogleSignIn.signInSilentlyAsync();
-            console.log(user);
+            if (Platform.OS == 'android') {
+                await GoogleSignIn.initAsync({
+                    clientId: config.cliendIdAndroid,
+                    webClientId: config.clientId
+                });
+            }
         } catch(e) {
-            this.webOrAndroid = 'web';
+            console.log(e);
         }
     }
 
@@ -239,7 +242,7 @@ export default class EztVedd extends PureComponent {
                     style={styles.list}
                     ref={(ref) => { this.stuffList = ref; }}
                 />
-                {!this.state.editing && <MainTools interface={this.reciever} webOrAndroid={this.webOrAndroid} />}
+                {!this.state.editing && <MainTools interface={this.reciever} />}
                 <StatusBar style="auto" />
             </View>
         );

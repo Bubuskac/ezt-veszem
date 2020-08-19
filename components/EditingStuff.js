@@ -53,6 +53,7 @@ class EditingStuff extends PureComponent {
                         <Picker.Item label='üveg' value='üveg' />
                         <Picker.Item label='flakon' value='flakon' />
                         <Picker.Item label='csomag' value='csomag' />
+                        <Picker.Item label='zsák' value='zsák' />
                     </Picker>
                 </View>
                 <View style={[styles.priceContainer, styles.stuffContainer]}>

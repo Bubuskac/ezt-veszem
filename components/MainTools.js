@@ -22,8 +22,19 @@ class MainTools extends PureComponent {
 
     componentDidMount() {
         if (Platform.OS == 'android' && this.state.profilePicture == null) {
-            this.login();
+            this.loginSilently();
         }
+    }
+
+    async loginSilently() {
+        this.setState({isLoading: true});
+        const user = await GoogleSignIn.signInSilentlyAsync();
+        if (user) {
+            me.interface('email', user.email);
+            me.setState({ profilePicture: user.photoURL});
+            me.interface('token', user.auth.idToken);
+        }
+        this.setState({isLoading: false});
     }
 
     async login() {

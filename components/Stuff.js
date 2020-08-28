@@ -12,11 +12,13 @@ let us = {};
 class Stuff extends PureComponent {
     id = -1;
     interface = null;
+    parent = null;
 
     constructor(props) {
         super(props);
         this.id = props.id;
         this.interface = props.interface;
+        this.parent = props.parent;
         this.state = {
             name: props.name,
             shop: props.shop,
@@ -30,21 +32,21 @@ class Stuff extends PureComponent {
             opened: false,
         };
         us[this.id] = this;
-        this.interface("register", this.id, this);
+        this.interface.call(this.parent, "register", this.id, this);
     }
 
     edit() {
         this.state.editing = !this.state.editing;
-        this.interface("update", this.id, this.state);
+        this.interface.call(this.parent, "update", this.id, this.state);
     }
 
     editField(fieldName, value) {
         this.state[fieldName] = value;
-        this.interface("update", this.id, this.state);
+        this.interface.call(this.parent, "update", this.id, this.state);
     }
 
     delete() {
-        this.interface("remove", this.id);
+        this.interface.call(this.parent, "remove", this.id);
     }
 
     openClose() {
@@ -53,7 +55,7 @@ class Stuff extends PureComponent {
     
     reciever(id, fieldName, value) {
         us[id].state[fieldName] = value;
-        us[id].interface("update", id, us[id].state);
+        us[id].interface.call(us[id].parent, "update", id, us[id].state);
     }
 
     refresh() {
@@ -91,6 +93,7 @@ class Stuff extends PureComponent {
                     unit={unit}
                     barCode={barCode}
                     interface={this.reciever}
+                    parent={this.parent}
                 />}
                 <TouchableOpacity style={styles.button} onPress={() => this.edit()}>
                     {editing == false && <Icon name={'pen'} style={styles.icon} color={iconColor} type={'font-awesome-5'}/>}

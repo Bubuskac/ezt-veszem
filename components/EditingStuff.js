@@ -4,11 +4,13 @@ import { StyleSheet, Text, TextInput, View, Picker } from 'react-native';
 class EditingStuff extends PureComponent {
     id = 0;
     interface = null;
+    parent = null;
 
     constructor(props) {
         super(props);
         this.id = props.id;
         this.interface = props.interface;
+        this.parent = props.parent;
         this.state = {
             name: props.name,
             shop: props.shop,
@@ -23,7 +25,7 @@ class EditingStuff extends PureComponent {
 
     editField(fieldName, value) {
         this.state[fieldName] = value;
-        this.interface(this.id, fieldName, value);
+        this.interface.call(this.parent, this.id, fieldName, value);
     }
 
     render() {

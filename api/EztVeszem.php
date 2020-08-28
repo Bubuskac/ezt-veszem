@@ -70,7 +70,7 @@ class EztVeszem {
             $this->connection->real_escape_string($stuff["barcode"]),
             $this->connection->real_escape_string($stuff["stuff_status"]),
             $this->connection->real_escape_string($stuff["stuff_id"]),
-            $this->connection->real_escape_string($stuff["user_id"]),
+            $this->connection->real_escape_string($stuff["user_id"])
         );
         if (!$this->connection->query($query)) {
             throw new Exception('Error updating stuff');
@@ -89,7 +89,7 @@ class EztVeszem {
             $this->connection->real_escape_string($stuff["count"]),
             $this->connection->real_escape_string($stuff["unit"]),
             $this->connection->real_escape_string($stuff["barcode"]),
-            $this->connection->real_escape_string($stuff["stuff_status"]),
+            $this->connection->real_escape_string($stuff["stuff_status"])
         );
         if(!$this->connection->query($query)) {
             throw new Exception('Error saving stuff');

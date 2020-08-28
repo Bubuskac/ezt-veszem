@@ -27,14 +27,14 @@ if ($request && $request->token) {
             $response->stuff = EztVeszem::store(
                 $connectionInfo, $payload['sub'], $payload['email'], $request->stuff, $request->removedStuff
             );
-            if ($response->stuff) {
+            if ($response->stuff !== false) {
                 $response->message = "Stuff stored";
             } else {
                 $response->error = "Save failed";
             }
         } else if ($request->method == "load") {
             $response->stuff = EztVeszem::load($connectionInfo, $payload['sub']);
-            if ($response->stuff) {
+            if ($response->stuff !== false) {
                 $response->message = "Stuff loaded";
             } else {
                 $response->error = "Load failed";

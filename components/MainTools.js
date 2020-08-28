@@ -5,19 +5,18 @@ import { GoogleLogin, GoogleLogout } from 'react-google-login';
 import * as GoogleSignIn from 'expo-google-sign-in';
 import config from '../config.json';
 
-let me = null;
-
 class MainTools extends PureComponent {
     interface = null;
+    parent = null;
 
     constructor(props) {
         super(props);
         this.interface = props.interface;
+        this.parent = props.parent;
         this.state = {
             profilePicture: null,
             isLoading: false
         }
-        me = this;
     }
 
     componentDidMount() {
@@ -30,9 +29,9 @@ class MainTools extends PureComponent {
         this.setState({isLoading: true});
         const user = await GoogleSignIn.signInSilentlyAsync();
         if (user) {
-            me.interface('email', user.email);
-            me.setState({ profilePicture: user.photoURL});
-            me.interface('token', user.auth.idToken);
+            this.interface.call(this.parent, 'email', user.email);
+            this.setState({ profilePicture: user.photoURL});
+            this.interface.call(this.parent, 'token', user.auth.idToken);
         }
         this.setState({isLoading: false});
     }
@@ -42,9 +41,9 @@ class MainTools extends PureComponent {
         try {
             const { type, user } = await GoogleSignIn.signInAsync();
             if (type === 'success') {
-                me.interface('email', user.email);
-                me.setState({ profilePicture: user.photoURL});
-                me.interface('token', user.auth.idToken);
+                this.interface.call(this.parent, 'email', user.email);
+                this.setState({ profilePicture: user.photoURL});
+                this.interface.call(this.parent, 'token', user.auth.idToken);
             } else {
                 Alert.alert(
                     "Google Login",
@@ -71,20 +70,20 @@ class MainTools extends PureComponent {
     }
 
     eraseData() {
-        me.interface('email', null);
-        me.interface('token', null);
-        me.setState({ profilePicture: null});
+        this.interface.call(this.parent, 'email', null);
+        this.interface.call(this.parent, 'token', null);
+        this.setState({ profilePicture: null});
         this.setState({isLoading: false});
     }
 
     receivedResponse(response) {
         if (response) {
             const profile = response.getBasicProfile();
-            me.interface('email', profile.getEmail());
-            me.interface('token', response.getAuthResponse().id_token);
-            me.setState({ profilePicture: profile.getImageUrl()});
+            this.interface.call(this.parent, 'email', profile.getEmail());
+            this.interface.call(this.parent, 'token', response.getAuthResponse().id_token);
+            this.setState({ profilePicture: profile.getImageUrl()});
         } else {
-            me.eraseData();
+            this.eraseData();
         }
     }
 
@@ -95,20 +94,20 @@ class MainTools extends PureComponent {
     render() {
         return (
             <View style={styles.buttonContainer}>
-                <TouchableOpacity onPress={() => this.interface("new")} style={styles.button}>
+                <TouchableOpacity onPress={() => this.interface.call(this.parent, "new")} style={styles.button}>
                     <Icon name={'plus'} color={'#FFFFFF'} type={'font-awesome-5'}/>
                 </TouchableOpacity>
-                <TouchableOpacity onPress={() => this.interface("save")} style={styles.button}>
+                <TouchableOpacity onPress={() => this.interface.call(this.parent, "save")} style={styles.button}>
                     <Icon name={'save'} color={'#FFFFFF'} type={'font-awesome-5'}/>
                 </TouchableOpacity>
                 {Platform.OS == 'android' && this.state.profilePicture == null && <TouchableOpacity
-                    onPress={() => this.login()} style={styles.button}>
+                    onPress={() => {this.login.call(this)}} style={styles.button}>
                         {this.state.isLoading ? 
                             <ActivityIndicator /> : 
                             <Icon name={'google'} color={'#FFFFFF'} type={'font-awesome-5'}/>}
                 </TouchableOpacity>}
                 {Platform.OS == 'android' && this.state.profilePicture != null && <TouchableOpacity
-                    onPress={() => this.logout()} style={styles.button}>
+                    onPress={() => {this.logout.call(this)}} style={styles.button}>
                         {this.state.isLoading ? 
                             <ActivityIndicator /> : 
                             <Image style={styles.button} source={{uri: this.state.profilePicture}}/>}
@@ -121,8 +120,8 @@ class MainTools extends PureComponent {
                         </TouchableOpacity>
                     )}
                     buttonText='G'
-                    onSuccess={this.receivedResponse}
-                    onFailure={this.failedResponse}
+                    onSuccess={(response) => {this.receivedResponse.call(this, response)}}
+                    onFailure={(response) => {this.failedResponse.call(this, response)}}
                     cookiePolicy={'single_host_origin'}
                     isSignedIn={true}
                 />}
@@ -134,8 +133,8 @@ class MainTools extends PureComponent {
                         </TouchableOpacity>
                     )}
                     buttonText=''
-                    onLogoutSuccess={this.receivedResponse}
-                    onFailure={this.failedResponse}
+                    onLogoutSuccess={(response) => {this.receivedResponse.call(this, response)}}
+                    onFailure={(response) => {this.failedResponse.call(this, response)}}
                     cookiePolicy={'single_host_origin'}
                 />}
             </View>

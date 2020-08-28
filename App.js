@@ -7,14 +7,11 @@ import AsyncStorage from '@react-native-community/async-storage';
 import * as GoogleSignIn from 'expo-google-sign-in';
 import config from './config.json';
 
-let me = null;
-
 export default class EztVedd extends PureComponent {
     minId = -1;
-    stuffList = null;
+    stuffListView = null;
     email = null;
     gToken = null;
-    firstLoad = true;
     stuff = [];
     removedStuff = [];
 
@@ -25,7 +22,6 @@ export default class EztVedd extends PureComponent {
             refreshList: true,
             editing: false,
         }
-        me = this;
         this.loadStuff();
         this.setUpGoogle();
     }
@@ -149,7 +145,7 @@ export default class EztVedd extends PureComponent {
         });
         this.minId--;
         this.setStuff(items);
-        this.stuffList.scrollToEnd();
+        this.stuffListView.scrollToEnd();
     }
 
     removeStuff(id) {
@@ -188,31 +184,30 @@ export default class EztVedd extends PureComponent {
 
     reciever(type, id, stuff) {
         if (type == "remove") {
-            me.removeStuff(id);
+            this.removeStuff(id);
         }
         if (type == "update") {
-            me.updateStuff(id, stuff);
+            this.updateStuff(id, stuff);
         }
         if (type == "new") {
-            me.addNew();
+            this.addNew();
         }
         if (type == "save") {
-            me.saveStuff();
+            this.saveStuff();
         }
         if (type == "email") {
-            me.email = id;
+            this.email = id;
         }
         if (type == "token") {
-            me.gToken = id;
-            if (id != null && me.firstLoad) {
-                me.loadStuff(true);
-                me.firstLoad = false;
-            } else {
-                me.firstLoad = true;
+            if (this.gToken !== id) {
+                this.gToken = id;
+                if (id != null) {
+                    this.loadStuff(true);
+                }
             }
         }
         if (type == "register") {
-            me.stuff.push(stuff);
+            this.stuff.push(stuff);
         }
     }
     
@@ -234,15 +229,16 @@ export default class EztVedd extends PureComponent {
                                stuffStatus={item.stuffStatus}
                                editing={item.editing}
                                interface={this.reciever}
+                               parent={this}
                             />
                         )
                     }}
                     extraData={this.state.refreshList}
                     keyExtractor={stuff => stuff.id + ""}
                     style={styles.list}
-                    ref={(ref) => { this.stuffList = ref; }}
+                    ref={(ref) => { this.stuffListView = ref; }}
                 />
-                {!this.state.editing && <MainTools interface={this.reciever} />}
+                {!this.state.editing && <MainTools interface={this.reciever} parent={this} />}
                 <StatusBar style="auto" />
             </View>
         );

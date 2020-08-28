@@ -2,11 +2,9 @@ import React, { PureComponent } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
 class OpenedStuff extends PureComponent {
-    interface = null
 
     constructor(props) {
         super(props);
-        this.interface = props.interface;
         this.state = {
             name: props.name,
             shop: props.shop,

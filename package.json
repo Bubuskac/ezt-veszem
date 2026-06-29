@@ -21,7 +21,7 @@
     "expo-updates": "~0.2.8"
   },
   "devDependencies": {
-    "@babel/core": "^7.8.6",
+    "@babel/core": "^7.29.6",
     "babel-preset-expo": "~9.5.2"
   },
   "private": true
